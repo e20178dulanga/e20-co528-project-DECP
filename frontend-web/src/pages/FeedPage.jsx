@@ -50,8 +50,8 @@ function PostCard({ post, currentUserId, onLike, onShare, onDelete }) {
         <div className="post-media">
           {post.mediaFiles.map((m, i) =>
             m.type === 'image'
-              ? <img key={i} src={`http://localhost:5001${m.url}`} alt="post media" />
-              : <video key={i} controls src={`http://localhost:5001${m.url}`} />
+              ? <img key={i} src={`https://e20-co528-project-decp-feed-service.onrender.com${m.url}`} alt="post media" />
+              : <video key={i} controls src={`https://e20-co528-project-decp-feed-service.onrender.com${m.url}`} />
           )}
         </div>
       )}
