@@ -11,6 +11,7 @@ const app = express();
 // ── CORS — allow local dev + production frontend domain ───────
 const allowedOrigins = [
   'http://localhost:5173',
+  'decp-frontend-git-main-e20189-4691s-projects.vercel.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
