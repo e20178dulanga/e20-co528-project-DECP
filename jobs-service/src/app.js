@@ -7,16 +7,16 @@ const applicationRoutes = require('./routes/applicationRoutes');
 const app = express();
 
 // ── Middleware ─────────────────────────────────────────────────
-// ── CORS — allow local dev + production frontend domain ───────
-const allowedOrigins = [
-  'http://localhost:5173',
-  'decp-frontend-git-main-e20189-4691s-projects.vercel.app',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+// ── CORS ───────────────────────────────────────────────────────
+// Allows: localhost dev + any *.vercel.app URL (covers Vercel
+// production, git-branch, and per-deploy preview URLs automatically)
+const VERCEL_PATTERN = /\.vercel\.app$/;
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    if (!origin) return cb(null, true);                    // server-to-server / Postman
+    if (origin === 'http://localhost:5173') return cb(null, true);
+    if (VERCEL_PATTERN.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
