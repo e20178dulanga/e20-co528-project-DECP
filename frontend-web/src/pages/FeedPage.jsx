@@ -48,11 +48,14 @@ function PostCard({ post, currentUserId, onLike, onShare, onDelete }) {
 
       {post.mediaFiles?.length > 0 && (
         <div className="post-media">
-          {post.mediaFiles.map((m, i) =>
-            m.type === 'image'
-              ? <img key={i} src={`http://localhost:5001${m.url}`} alt="post media" />
-              : <video key={i} controls src={`http://localhost:5001${m.url}`} />
-          )}
+          {post.mediaFiles.map((m, i) => {
+            // Derive base URL from FEED_URL (remove the /api suffix)
+            const mediaBase = FEED_URL.replace(/\/api$/, '');
+            const src = m.url?.startsWith('http') ? m.url : `${mediaBase}${m.url}`;
+            return m.type === 'image'
+              ? <img key={i} src={src} alt="post media" />
+              : <video key={i} controls src={src} />;
+          })}
         </div>
       )}
 
@@ -64,7 +67,7 @@ function PostCard({ post, currentUserId, onLike, onShare, onDelete }) {
           💬 {post.commentCount || 0}
         </button>
         <button onClick={() => onShare(post._id)} className="btn btn-secondary btn-sm">
-          🔗 {post.shares || 0}
+          ↗ Share {post.shares > 0 ? `(${post.shares})` : ''}
         </button>
       </div>
 

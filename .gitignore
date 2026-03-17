@@ -1,0 +1,12 @@
+# Root gitignore — covers all services and the frontend
+node_modules/
+.env
+*.env
+.env.local
+.env.production
+*.log
+uploads/*
+!uploads/README.txt
+dist/
+.DS_Store
+Thumbs.db

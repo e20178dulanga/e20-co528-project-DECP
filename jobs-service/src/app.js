@@ -7,7 +7,19 @@ const applicationRoutes = require('./routes/applicationRoutes');
 const app = express();
 
 // ── Middleware ─────────────────────────────────────────────────
-app.use(cors());
+// ── CORS — allow local dev + production frontend domain ───────
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 // ── Routes ─────────────────────────────────────────────────────

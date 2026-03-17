@@ -428,4 +428,90 @@ All routes require `Authorization: Bearer <token>`.
 - [x] **Phase 3** – Jobs & Internships (Jobs Service, port 5002)
 - [x] **Phase 4** – Events & Announcements (Events Service, port 5003)
 - [x] **Phase 5** – Web Client (React + Vite, port 5173)
-- [ ] **Phase 6** – Cloud deployment / Docker Compose
+- [x] **Phase 6** – Cloud Deployment Preparation (Render + Vercel)
+
+---
+
+## Deployment Preparation (Phase 6)
+
+> **Strategy**: 4 backend microservices → [Render.com](https://render.com) free web services | Frontend → [Vercel](https://vercel.com) free hobby tier | Database → [MongoDB Atlas](https://cloud.mongodb.com) free M0 cluster.
+
+### Architecture: Production
+
+```
+MongoDB Atlas (M0) ──→ shared by all 4 services via MONGO_URI env var
+
+Backend (Render.com — 4 separate web services, each from its subfolder):
+  ├── decp-auth-service     → backend/           (Start: node server.js)
+  ├── decp-feed-service     → feed-service/       (Start: node server.js)
+  ├── decp-jobs-service     → jobs-service/       (Start: node server.js)
+  └── decp-events-service   → events-service/     (Start: node server.js)
+
+Frontend (Vercel — from frontend-web/ subfolder):
+  └── decp-frontend.vercel.app
+```
+
+### What Was Changed for Production
+
+| File | Change |
+|---|---|
+| `backend/src/app.js` | CORS reads `FRONTEND_URL` from env; `localhost:5173` kept as fallback |
+| `feed-service/src/app.js` | Same CORS pattern |
+| `jobs-service/src/app.js` | Same CORS pattern |
+| `events-service/src/app.js` | Same CORS pattern |
+| `*/src/config/db.js` (all 4) | Uses `process.env.MONGO_URI` — no hardcoded localhost |
+| `*/server.js` (all 4) | Uses `process.env.PORT` with local fallback |
+| `*/package.json` (all 4) | `"start": "node server.js"` — Render auto-detects this |
+| `frontend-web/src/api/config.js` | All base URLs use `import.meta.env.VITE_*` with localhost fallbacks |
+| `frontend-web/vercel.json` | SPA rewrite rule: all paths serve `index.html` |
+| `*/.env.example` (all 5) | Template env files updated with all production variables |
+
+### Environment Variables Reference
+
+#### Render.com — All 4 backend services (set per service)
+
+| Variable | Description |
+|---|---|
+| `MONGO_URI` | MongoDB Atlas connection string |
+| `JWT_SECRET` | Long random string — **identical across all 4 services** |
+| `JWT_EXPIRES_IN` | `7d` |
+| `FRONTEND_URL` | Your Vercel URL, e.g. `https://decp-frontend.vercel.app` |
+
+> **Feed Service only** — also set `MAX_FILE_SIZE=10485760`
+
+#### Vercel — Frontend
+
+| Variable | Value |
+|---|---|
+| `VITE_AUTH_URL` | `https://decp-auth-service.onrender.com/api` |
+| `VITE_FEED_URL` | `https://decp-feed-service.onrender.com/api` |
+| `VITE_JOBS_URL` | `https://decp-jobs-service.onrender.com/api` |
+| `VITE_EVENTS_URL` | `https://decp-events-service.onrender.com/api` |
+
+> ⚠️ Replace the `onrender.com` subdomain placeholders with your actual Render service URLs after deployment.
+
+### Deployment Steps (Manual — UI-based)
+
+#### 1. MongoDB Atlas
+1. Create a free **M0** cluster at [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Create a DB user with a strong password
+3. Add `0.0.0.0/0` to the IP Allow List (Render uses dynamic IPs)
+4. Copy the connection string: `mongodb+srv://<user>:<password>@<cluster>.mongodb.net/decp?retryWrites=true&w=majority`
+
+#### 2. Render.com (repeat for each of 4 services)
+1. New → **Web Service** → connect your GitHub repo
+2. **Root Directory**: set to the service subfolder (e.g. `backend`, `feed-service`, etc.)
+3. **Build Command**: `npm install`
+4. **Start Command**: `node server.js` (auto-detected from `package.json`)
+5. **Instance Type**: Free
+6. Under **Environment** → add all variables from the table above
+
+#### 3. Vercel (Frontend)
+1. New Project → import your GitHub repo
+2. **Root Directory**: `frontend-web`
+3. **Framework**: Vite (auto-detected)
+4. Under **Environment Variables** → add all `VITE_*` variables
+5. Deploy
+
+#### 4. Post-Deployment: Update CORS
+After all 4 Render services are live, go back to each service's Environment settings and update `FRONTEND_URL` to your actual Vercel URL.

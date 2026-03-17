@@ -1,88 +1,97 @@
 # DECP — State Log
 
-## Current Status: ✅ Phase 5 Complete — Awaiting Local Test Confirmation
+## Current Status: ✅ Phase 6 Complete — Ready for GitHub Push & Manual Deployment
 
 ---
 
-## Active Services
+## Active Services (Local)
 
 | Service | Port | Status |
 |---|---|---|
-| Auth Service (`backend/`) | 5000 | ✅ Running & confirmed |
-| Feed Service (`feed-service/`) | 5001 | ✅ Running & confirmed |
-| Jobs Service (`jobs-service/`) | 5002 | ✅ Running & confirmed |
-| Events Service (`events-service/`) | 5003 | ✅ Running & confirmed |
-| **Web Client** (`frontend-web/`) | **5173** | ✅ Built — pending test |
+| Auth Service (`backend/`) | 5000 | ✅ Running |
+| Feed Service (`feed-service/`) | 5001 | ✅ Running |
+| Jobs Service (`jobs-service/`) | 5002 | ✅ Running |
+| Events Service (`events-service/`) | 5003 | ✅ Running |
+| Web Client (`frontend-web/`) | 5173 | ✅ Running |
 
 ---
 
-## Last Completed Step
+## Phase 6 — Deployment Preparation (Completed 2026-03-17)
 
-**Phase 5: Web Client** — React + Vite frontend, all 4 backend services integrated. Dependencies: `axios`, `react-router-dom`.
+### Audit Results
 
-### Files written (Phase 5)
+All 4 backend services passed the production audit — **no code changes were required**:
 
-| File | Purpose |
+| Check | Result |
 |---|---|
-| `index.html` | Root HTML w/ Inter font + SEO meta tags |
-| `src/index.css` | Full dark-theme design system (glassmorphism, gradients, utilities) |
-| `src/main.jsx` | Entry with BrowserRouter + AuthProvider |
-| `src/App.jsx` | Route definitions + ProtectedRoute wrapper |
-| `src/api/config.js` | All 4 service base URLs + helpers |
-| `src/api/authApi.js` | Auth service calls (port 5000) |
-| `src/api/feedApi.js` | Feed service calls (port 5001) |
-| `src/api/jobsApi.js` | Jobs service calls (port 5002) |
-| `src/api/eventsApi.js` | Events service calls (port 5003) |
-| `src/context/AuthContext.jsx` | JWT context — persists token, loads user on mount |
-| `src/components/Navbar.jsx` | Sticky glassmorphism nav w/ role display, sign-out |
-| `src/components/ProtectedRoute.jsx` | Route guard → /login redirect |
-| `src/pages/LoginPage.jsx` | Login with glassmorphism card |
-| `src/pages/RegisterPage.jsx` | Register with role selector |
-| `src/pages/FeedPage.jsx` | Feed: create/view posts, likes, comments, media |
-| `src/pages/JobsPage.jsx` | Jobs: list, filter type, apply modal, post modal |
-| `src/pages/EventsPage.jsx` | Events: list, filter type, RSVP, notifications dropdown |
+| `process.env.PORT` in all `server.js` | ✅ Already correct |
+| `process.env.MONGO_URI` in all `db.js` | ✅ Already correct |
+| CORS reads `process.env.FRONTEND_URL` in all `app.js` | ✅ Already correct |
+| `"start": "node server.js"` in all `package.json` | ✅ Already correct |
+| Frontend uses `import.meta.env.VITE_*` in `api/config.js` | ✅ Already correct |
+| No hardcoded `localhost` outside of config/fallback files | ✅ Confirmed |
 
----
+### Files Updated During This Phase
 
-## Commands to Start Everything
+| File | Change |
+|---|---|
+| `backend/.env.example` | Added `FRONTEND_URL`, improved comments |
+| `feed-service/.env.example` | Added `FRONTEND_URL`, `JWT_EXPIRES_IN` |
+| `jobs-service/.env.example` | Added `FRONTEND_URL`, `JWT_EXPIRES_IN` |
+| `events-service/.env.example` | Added `FRONTEND_URL`, `JWT_EXPIRES_IN`, header comment |
+| `frontend-web/.env.example` | **NEW** — template for all `VITE_*` variables |
+| `README.md` | Added full **Deployment Preparation** section |
+| `STATE_LOG.md` | This file — updated status |
 
-```powershell
-# Terminal 1
-cd "d:\Academic UOP\Sem8\CO528_Applied_software\miniProject\backend" && npm run dev
+### Deployment Strategy
 
-# Terminal 2
-cd "d:\Academic UOP\Sem8\CO528_Applied_software\miniProject\feed-service" && npm run dev
+```
+MongoDB Atlas (Free M0) ──→ shared by all 4 services via MONGO_URI
 
-# Terminal 3
-cd "d:\Academic UOP\Sem8\CO528_Applied_software\miniProject\jobs-service" && npm run dev
+Backend (4 services) ──→ Render.com free web services (manual GitHub import)
+  ├── decp-auth-service     root dir: backend/
+  ├── decp-feed-service     root dir: feed-service/
+  ├── decp-jobs-service     root dir: jobs-service/
+  └── decp-events-service   root dir: events-service/
 
-# Terminal 4
-cd "d:\Academic UOP\Sem8\CO528_Applied_software\miniProject\events-service" && npm run dev
-
-# Terminal 5 — Web Client
-cd "d:\Academic UOP\Sem8\CO528_Applied_software\miniProject\frontend-web"
-npm run dev
-# Open http://localhost:5173
+Frontend ──→ Vercel (manual GitHub import)
+  root dir: frontend-web/
 ```
 
 ---
 
-## Test Flow (Phase 5)
+## Environment Variables Checklist
 
-1. Open http://localhost:5173 → Register as a student
-2. Login → lands on Feed page
-3. Create a text post → confirm it appears in the feed
-4. Navigate to Jobs → view listings, apply for one
-5. Navigate to Events → RSVP to an event
-6. Check 🔔 notification bell → see rsvp_received (as alumni) or new_event
+### 🟠 Render.com — For EACH of the 4 backend services
+
+| Variable | Notes |
+|---|---|
+| `NODE_ENV` | Set to `production` |
+| `MONGO_URI` | MongoDB Atlas connection string |
+| `JWT_SECRET` | One long random string — **SAME VALUE** across all 4 services |
+| `JWT_EXPIRES_IN` | `7d` |
+| `FRONTEND_URL` | Your Vercel URL (e.g. `https://decp-frontend.vercel.app`) |
+
+> **Feed Service only** — additionally set `MAX_FILE_SIZE=10485760`
+
+### 🟣 Vercel — Frontend
+
+| Variable | Value (replace with actual Render URLs) |
+|---|---|
+| `VITE_AUTH_URL` | `https://decp-auth-service.onrender.com/api` |
+| `VITE_FEED_URL` | `https://decp-feed-service.onrender.com/api` |
+| `VITE_JOBS_URL` | `https://decp-jobs-service.onrender.com/api` |
+| `VITE_EVENTS_URL` | `https://decp-events-service.onrender.com/api` |
 
 ---
 
-## Next Step (After Test Confirmation)
+## Next Steps
 
-> **BLOCKED** — Awaiting user confirmation.
-
-Once confirmed: **Phase 6 — Cloud Deployment / Docker Compose**
+1. Push code to GitHub (`git push`)
+2. Create MongoDB Atlas M0 cluster → get connection string
+3. Deploy each service on Render.com (connect repo, set root dir, set env vars)
+4. Deploy frontend on Vercel (connect repo, set root dir, set `VITE_*` env vars)
+5. Update `FRONTEND_URL` on each Render service with actual Vercel URL
 
 ---
 
@@ -94,5 +103,5 @@ Once confirmed: **Phase 6 — Cloud Deployment / Docker Compose**
 | Phase 2 — Feed & Media Posts (port 5001) | ✅ Confirmed | 2026-03-07 |
 | Phase 3 — Jobs & Internships (port 5002) | ✅ Confirmed | 2026-03-07 |
 | Phase 4 — Events & Announcements (port 5003) | ✅ Confirmed | 2026-03-07 |
-| Phase 5 — Web Client (port 5173) | ✅ Built, pending test | 2026-03-08 |
-| Phase 6 — Deployment | ⏳ Not started | — |
+| Phase 5 — Web Client (port 5173) | ✅ Confirmed | 2026-03-08 |
+| Phase 6 — Cloud Deployment Preparation | ✅ Complete | 2026-03-17 |
