@@ -11,6 +11,8 @@ const app = express();
 // Allows: localhost dev + any *.vercel.app URL (covers Vercel
 // production, git-branch, and per-deploy preview URLs automatically)
 const VERCEL_PATTERN = /\.vercel\.app$/;
+console.log('ℹ️  Feed Service CORS: allowing localhost:5173 + *.vercel.app');
+
 
 app.use(cors({
   origin: (origin, cb) => {
