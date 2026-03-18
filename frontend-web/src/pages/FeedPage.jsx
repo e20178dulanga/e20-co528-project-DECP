@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { getPosts, createPost, createMediaPost, likePost, sharePost, getComments, addComment, deletePost } from '../api/feedApi';
 import { initials, fmtDate, FEED_URL } from '../api/config';
@@ -95,59 +96,61 @@ function PostCard({ post, currentUserId, onLike, onShare, onDelete }) {
 
 export default function FeedPage() {
   const { user } = useAuth();
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [content, setContent] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const load = async () => {
-    try { const res = await getPosts(); setPosts(res.data.posts); }
-    catch { setError('Could not load posts. Is the Feed Service running?'); }
-    finally { setLoading(false); }
-  };
-  useEffect(() => { load(); }, []);
+  const { data: posts = [], isLoading: loading, isError } = useQuery({
+    queryKey: ['posts'],
+    queryFn: async () => (await getPosts()).data.posts
+  });
 
-  const handlePost = async (e) => {
+  const createMutation = useMutation({
+    mutationFn: async (data) => data instanceof FormData ? await createMediaPost(data) : await createPost(data),
+    onSuccess: (res) => {
+      queryClient.setQueryData(['posts'], old => [res.data.post, ...(old || [])]);
+      setContent(''); setMediaFiles([]); if (fileRef.current) fileRef.current.value = '';
+    },
+    onError: (err) => setError(err.response?.data?.message || 'Failed to post.')
+  });
+
+  const handlePost = (e) => {
     e.preventDefault();
     if (!content.trim() && mediaFiles.length === 0) return;
-    setSubmitting(true); setError('');
-    try {
-      let res;
-      if (mediaFiles.length > 0) {
-        const fd = new FormData();
-        fd.append('content', content);
-        mediaFiles.forEach(f => fd.append('media', f));
-        res = await createMediaPost(fd);
-      } else {
-        res = await createPost({ content });
-      }
-      setPosts(p => [res.data.post, ...p]);
-      setContent(''); setMediaFiles([]); if (fileRef.current) fileRef.current.value = '';
-    } catch (err) { setError(err.response?.data?.message || 'Failed to post.'); }
-    finally { setSubmitting(false); }
+    setError('');
+    if (mediaFiles.length > 0) {
+      const fd = new FormData();
+      fd.append('content', content);
+      mediaFiles.forEach(f => fd.append('media', f));
+      createMutation.mutate(fd);
+    } else {
+      createMutation.mutate({ content });
+    }
   };
 
-  const handleLike = async (id) => {
-    try {
-      const res = await likePost(id);
-      setPosts(p => p.map(post => post._id === id ? { ...post, likes: res.data.post.likes } : post));
-    } catch { }
-  };
+  const submitting = createMutation.isPending;
 
-  const handleShare = async (id) => {
-    try {
-      const res = await sharePost(id);
-      setPosts(p => p.map(post => post._id === id ? { ...post, shares: res.data.shares } : post));
-    } catch { }
-  };
+  const likeMutation = useMutation({
+    mutationFn: likePost,
+    onSuccess: (res, id) => queryClient.setQueryData(['posts'], old => (old || []).map(p => p._id === id ? { ...p, likes: res.data.post.likes } : p))
+  });
+  const handleLike = id => likeMutation.mutate(id);
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this post?')) return;
-    try { await deletePost(id); setPosts(p => p.filter(post => post._id !== id)); }
-    catch (err) { alert(err.response?.data?.message || 'Delete failed.'); }
+  const shareMutation = useMutation({
+    mutationFn: sharePost,
+    onSuccess: (res, id) => queryClient.setQueryData(['posts'], old => (old || []).map(p => p._id === id ? { ...p, shares: res.data.shares } : p))
+  });
+  const handleShare = id => shareMutation.mutate(id);
+
+  const deleteMutation = useMutation({
+    mutationFn: deletePost,
+    onSuccess: (_, id) => queryClient.setQueryData(['posts'], old => (old || []).filter(p => p._id !== id)),
+    onError: (err) => alert(err.response?.data?.message || 'Delete failed.')
+  });
+  const handleDelete = id => {
+    if (confirm('Delete this post?')) deleteMutation.mutate(id);
   };
 
   return (
@@ -178,6 +181,7 @@ export default function FeedPage() {
                   {submitting ? 'Posting…' : '✨ Post'}
                 </button>
               </div>
+              {isError && <div className="alert alert-error" style={{ marginTop: 8 }}>{error || 'Error loading posts.'}</div>}
               {error && <div className="alert alert-error" style={{ marginTop: 8 }}>{error}</div>}
             </div>
           </div>

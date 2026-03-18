@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { getJobs, createJob, applyForJob, getMyApplications } from '../api/jobsApi';
 import { fmtDate } from '../api/config';
@@ -105,39 +106,35 @@ function PostJobModal({ onClose, onSuccess }) {
 
 export default function JobsPage() {
   const { user } = useAuth();
-  const [jobs, setJobs] = useState([]);
-  const [myApps, setMyApps] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [applyJob, setApplyJob] = useState(null);
   const [showPostModal, setShowPostModal] = useState(false);
-  const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   const canPost = user.role === 'alumni' || user.role === 'admin';
 
-  const load = async () => {
-    try {
+  const { data: { jobs = [], myApps = [] } = {}, isLoading: loading, isError, error, refetch } = useQuery({
+    queryKey: ['jobs', filter],
+    queryFn: async () => {
       const params = filter !== 'all' ? `type=${filter}` : '';
       const [jobsRes, appsRes] = await Promise.all([getJobs(params), getMyApplications()]);
-      setJobs(jobsRes.data.jobs);
-      setMyApps(appsRes.data.applications.map(a => a.job._id));
-    } catch { setError('Could not load jobs. Is the Jobs Service running?'); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { load(); }, [filter]);
+      return {
+        jobs: jobsRes.data.jobs,
+        myApps: appsRes.data.applications.map(a => a.job._id)
+      };
+    }
+  });
 
   const handleApplySuccess = () => {
     setSuccessMsg('Application submitted!');
-    load();
+    refetch();
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 
   return (
     <div className="page-wrapper wide">
       {applyJob && <ApplyModal job={applyJob} onClose={() => setApplyJob(null)} onSuccess={handleApplySuccess} />}
-      {showPostModal && <PostJobModal onClose={() => setShowPostModal(false)} onSuccess={load} />}
+      {showPostModal && <PostJobModal onClose={() => setShowPostModal(false)} onSuccess={refetch} />}
 
       <div className="flex-between page-header">
         <div>
@@ -150,7 +147,7 @@ export default function JobsPage() {
       </div>
 
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
-      {error && <div className="alert alert-error">{error}</div>}
+      {isError && <div className="alert alert-error">Could not load jobs. Is the Jobs Service running?</div>}
 
       {/* Filters */}
       <div className="flex-gap" style={{ marginBottom: 20 }}>

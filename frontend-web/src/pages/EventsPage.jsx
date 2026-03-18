@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { getEvents, createEvent, rsvpEvent, cancelRsvp, getMyRsvps, getNotifications, markAllRead } from '../api/eventsApi';
 import { fmtDate } from '../api/config';
@@ -57,59 +58,68 @@ const TYPE_EMOJI = { event:'🎉', workshop:'🛠️', announcement:'📢' };
 
 export default function EventsPage() {
   const { user } = useAuth();
-  const [events, setEvents] = useState([]);
-  const [myRsvpIds, setMyRsvpIds] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState('all');
   const [showCreate, setShowCreate] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
-  const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   const canCreate = user.role === 'admin' || user.role === 'alumni';
 
-  const load = async () => {
-    try {
+  const { data: { events = [], myRsvpIds = [], notifications = [] } = {}, isLoading: loading, isError, refetch } = useQuery({
+    queryKey: ['events', filter],
+    queryFn: async () => {
       const params = filter !== 'all' ? `type=${filter}&upcoming=true` : 'upcoming=true';
       const [evRes, rsvpRes, notifRes] = await Promise.all([
         getEvents(params), getMyRsvps(), getNotifications()
       ]);
-      setEvents(evRes.data.events);
-      setMyRsvpIds(rsvpRes.data.rsvps.map(r => r.event?._id || r.event));
-      setNotifications(notifRes.data.notifications);
-    } catch { setError('Could not load events. Is the Events Service running?'); }
-    finally { setLoading(false); }
-  };
+      return {
+        events: evRes.data.events,
+        myRsvpIds: rsvpRes.data.rsvps.map(r => r.event?._id || r.event),
+        notifications: notifRes.data.notifications
+      };
+    }
+  });
 
-  useEffect(() => { load(); }, [filter]);
-
-  const handleRsvp = async (eventId, isRsvped) => {
-    try {
-      if (isRsvped) {
-        await cancelRsvp(eventId);
-        setMyRsvpIds(ids => ids.filter(id => id !== eventId));
-        setEvents(evs => evs.map(e => e._id === eventId ? { ...e, rsvpCount: e.rsvpCount - 1 } : e));
-      } else {
-        await rsvpEvent(eventId);
-        setMyRsvpIds(ids => [...ids, eventId]);
-        setEvents(evs => evs.map(e => e._id === eventId ? { ...e, rsvpCount: e.rsvpCount + 1 } : e));
+  const rsvpMutation = useMutation({
+    mutationFn: async ({ eventId, isRsvped }) => {
+      if (isRsvped) await cancelRsvp(eventId);
+      else await rsvpEvent(eventId);
+      return { eventId, isRsvped };
+    },
+    onSuccess: ({ eventId, isRsvped }) => {
+      queryClient.setQueryData(['events', filter], old => {
+        if (!old) return old;
+        const newIds = isRsvped ? old.myRsvpIds.filter(id => id !== eventId) : [...old.myRsvpIds, eventId];
+        const newEvents = old.events.map(e => e._id === eventId ? { ...e, rsvpCount: e.rsvpCount + (isRsvped ? -1 : 1) } : e);
+        return { ...old, myRsvpIds: newIds, events: newEvents };
+      });
+      if (!isRsvped) {
         setSuccessMsg('RSVP confirmed! 🎉');
         setTimeout(() => setSuccessMsg(''), 3000);
       }
-    } catch (err) { alert(err.response?.data?.message || 'Action failed.'); }
-  };
+    },
+    onError: (err) => alert(err.response?.data?.message || 'Action failed.')
+  });
 
-  const handleMarkAllRead = async () => {
-    await markAllRead();
-    setNotifications(ns => ns.map(n => ({ ...n, isRead: true })));
-  };
+  const handleRsvp = (eventId, isRsvped) => rsvpMutation.mutate({ eventId, isRsvped });
+
+  const markReadMutation = useMutation({
+    mutationFn: markAllRead,
+    onSuccess: () => {
+      queryClient.setQueryData(['events', filter], old => {
+        if (!old) return old;
+        return { ...old, notifications: old.notifications.map(n => ({ ...n, isRead: true })) };
+      });
+    }
+  });
+  const handleMarkAllRead = () => markReadMutation.mutate();
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <div className="page-wrapper wide">
-      {showCreate && <CreateEventModal onClose={() => setShowCreate(false)} onSuccess={load} />}
+      {showCreate && <CreateEventModal onClose={() => setShowCreate(false)} onSuccess={refetch} />}
 
       <div className="flex-between page-header">
         <div>
@@ -146,7 +156,7 @@ export default function EventsPage() {
       </div>
 
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
-      {error && <div className="alert alert-error">{error}</div>}
+      {isError && <div className="alert alert-error">Could not load events. Is the Events Service running?</div>}
 
       {/* Filters */}
       <div className="flex-gap" style={{ marginBottom: 20 }}>

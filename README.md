@@ -429,6 +429,7 @@ All routes require `Authorization: Bearer <token>`.
 - [x] **Phase 4** – Events & Announcements (Events Service, port 5003)
 - [x] **Phase 5** – Web Client (React + Vite, port 5173)
 - [x] **Phase 6** – Cloud Deployment Preparation (Render + Vercel)
+- [x] **Phase 7** – Frontend Caching & UX Optimization (React Query)
 
 ---
 
