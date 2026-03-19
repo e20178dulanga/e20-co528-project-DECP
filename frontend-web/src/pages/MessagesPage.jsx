@@ -3,13 +3,36 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getConversations, getMessages, sendMessage } from '../api/messagesApi';
 import { useAuth } from '../context/AuthContext';
 import { initials } from '../api/config';
+import { searchUsers } from '../api/usersApi';
 
 export default function MessagesPage() {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [activeUser, setActiveUser] = useState(null);
   const [content, setContent] = useState('');
+  const [searchQ, setSearchQ] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQ.trim()) return;
+    setIsSearching(true);
+    try {
+      const res = await searchUsers(searchQ);
+      setSearchResults(res.data.users);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQ('');
+    setSearchResults([]);
+  };
 
   const { data: convos = [] } = useQuery({
     queryKey: ['conversations'],
@@ -58,10 +81,31 @@ export default function MessagesPage() {
       {/* Sidebar: Conversations */}
       <div className="card" style={{ width: 320, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '20px', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
-          <h3 style={{ margin: 0 }}>Messages</h3>
+          <h3 style={{ margin: 0, marginBottom: 16 }}>Messages</h3>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
+            <input type="text" className="form-group" style={{ margin: 0, flex: 1, padding: '8px 12px', fontSize: 13 }} placeholder="Search users by name..." value={searchQ} onChange={e => setSearchQ(e.target.value)} />
+            <button type="submit" className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }} disabled={isSearching}>Find</button>
+          </form>
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
-          {contacts.length === 0 ? (
+          {searchResults.length > 0 ? (
+            <div>
+              <div style={{ padding: '8px 16px', fontSize: 12, background: '#f1f5f9', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                <span>Search Results</span>
+                <span style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600 }} onClick={clearSearch}>X Clear</span>
+              </div>
+              {searchResults.map(u => (
+                <div key={u._id} onClick={() => { setActiveUser({ _id: u._id, name: u.name }); clearSearch(); }}
+                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}>
+                  <div className="avatar" style={{ width: 32, height: 32, fontSize: 12 }}>{initials(u.name)}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{u.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{u.role}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : contacts.length === 0 ? (
              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14 }}>
                No recent conversations.
              </div>

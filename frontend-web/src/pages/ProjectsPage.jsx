@@ -1,7 +1,42 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProjects, createProject, addCollaborator, uploadDocuments } from '../api/projectsApi';
+import { searchUsers } from '../api/usersApi';
 import { useAuth } from '../context/AuthContext';
+
+function AddCollaboratorForm({ projectId, onAdd }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if(!query.trim()) return;
+    try {
+      const res = await searchUsers(query);
+      // Filter out existing potential collaborators visually if needed, but backend handles deduping anyway
+      setResults(res.data.users);
+    } catch(err) { }
+  };
+
+  return (
+    <div style={{ marginTop: 12, padding: 12, background: 'var(--bg-secondary)', borderRadius: 8, border: '1px solid var(--border)' }}>
+      <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
+        <input type="text" className="form-group" style={{ margin: 0, flex: 1, padding: '6px 10px', fontSize: 13 }} placeholder="Search user to add..." value={query} onChange={e => setQuery(e.target.value)} />
+        <button type="submit" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 13 }}>Search</button>
+      </form>
+      {results.length > 0 && (
+        <div style={{ marginTop: 8 }}>
+          {results.map(u => (
+            <div key={u._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, paddingBottom: 6, borderBottom: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 13 }}><strong>{u.name}</strong> <span style={{ color: 'var(--text-muted)' }}>({u.role})</span></span>
+              <button className="btn btn-primary" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => { onAdd({ projectId, userId: u._id, userName: u.name }); setResults([]); setQuery(''); }}>Add</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -27,6 +62,11 @@ export default function ProjectsPage() {
 
   const uploadMutation = useMutation({
     mutationFn: ({ id, formData }) => uploadDocuments(id, formData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] })
+  });
+
+  const collabMutation = useMutation({
+    mutationFn: ({ projectId, userId, userName }) => addCollaborator(projectId, { userId, userName }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] })
   });
 
@@ -85,6 +125,9 @@ export default function ProjectsPage() {
             </div>
             <div style={{ fontSize: 13, marginBottom: 16, color: 'var(--text-primary)' }}>
               <strong>Collaborators:</strong> {p.collaborators.length > 0 ? p.collaborators.map(c => c.name).join(', ') : 'None'}
+              {p.owner === user._id && (
+                <AddCollaboratorForm projectId={p._id} onAdd={(data) => collabMutation.mutate(data)} />
+              )}
             </div>
 
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 'auto' }}>
