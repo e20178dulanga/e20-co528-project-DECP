@@ -163,7 +163,7 @@ export default function EventsPage() {
         {['all', 'event', 'workshop', 'announcement'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-secondary'}`}>
-            {f === 'all' ? '📋 All' : f === 'event' ? '🎉 Events' : f === 'workshop' ? '🛠️ Workshops' : '📢 Announcements'}
+            {f === 'all' ? 'All' : f === 'event' ? 'Events' : f === 'workshop' ? 'Workshops' : 'Announcements'}
           </button>
         ))}
       </div>
