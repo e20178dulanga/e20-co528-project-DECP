@@ -4,6 +4,7 @@ const path = require('path');
 
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const projectRoutes = require('./routes/projectRoutes');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 // ── Routes ────────────────────────────────────────────────────
 app.use('/api/posts', postRoutes);
 app.use('/api/posts', commentRoutes);
+app.use('/api/projects', projectRoutes);
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

@@ -55,6 +55,18 @@ const getUserById = async (req, res) => {
   }
 };
 
+// ── GET /api/users/stats (admin only) ─────────────────────────
+const getUserStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const students = await User.countDocuments({ role: 'student' });
+    const alumni = await User.countDocuments({ role: 'alumni' });
+    return res.status(200).json({ totalUsers, students, alumni });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 // ── GET /api/users  (admin only) ──────────────────────────────
 const getAllUsers = async (req, res) => {
   try {
@@ -65,4 +77,4 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { getMe, updateMe, getUserById, getAllUsers };
+module.exports = { getMe, updateMe, getUserById, getAllUsers, getUserStats };

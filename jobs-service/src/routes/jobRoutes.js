@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const { requireRole } = require('../middleware/roleMiddleware');
 const {
-  createJob, getJobs, getJobById, updateJob, deleteJob, closeJob,
+  createJob, getJobs, getJobById, updateJob, deleteJob, closeJob, getJobStats
 } = require('../controllers/jobController');
 
 const router = express.Router();
@@ -12,6 +12,7 @@ router.use(authMiddleware);
 
 // Public (authenticated) routes
 router.get('/', getJobs);
+router.get('/stats', requireRole('admin', 'alumni'), getJobStats);
 router.get('/:id', getJobById);
 
 // Alumni or admin only — create posting

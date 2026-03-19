@@ -7,6 +7,9 @@ import RegisterPage from './pages/RegisterPage';
 import FeedPage from './pages/FeedPage';
 import JobsPage from './pages/JobsPage';
 import EventsPage from './pages/EventsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import MessagesPage from './pages/MessagesPage';
+import ProjectsPage from './pages/ProjectsPage';
 
 export default function App() {
   const { loading } = useAuth();
@@ -34,6 +37,9 @@ export default function App() {
           <Route path="/feed"   element={<FeedPage />} />
           <Route path="/jobs"   element={<JobsPage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
         </Route>
 
         {/* Catch-all */}

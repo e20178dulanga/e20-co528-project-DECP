@@ -130,4 +130,16 @@ const closeJob = async (req, res) => {
   }
 };
 
-module.exports = { createJob, getJobs, getJobById, updateJob, deleteJob, closeJob };
+// ── GET /api/jobs/stats ──────────────────────────────────────
+const getJobStats = async (req, res) => {
+  try {
+    const totalJobs = await Job.countDocuments();
+    const openJobs = await Job.countDocuments({ isOpen: true });
+    const popularJobs = await Job.find().sort({ applicationCount: -1 }).limit(5);
+    return res.status(200).json({ totalJobs, openJobs, popularJobs });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createJob, getJobs, getJobById, updateJob, deleteJob, closeJob, getJobStats };

@@ -8,6 +8,8 @@ const NAV_LINKS = [
   { to: '/feed', label: 'Feed' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/events', label: 'Events' },
+  { to: '/messages', label: 'Messages' },
+  { to: '/projects', label: 'Projects' },
 ];
 
 export default function Navbar() {
@@ -45,6 +47,17 @@ export default function Navbar() {
             {label}
           </NavLink>
         ))}
+        {(user.role === 'admin' || user.role === 'alumni') && (
+          <NavLink to="/analytics"
+            style={({ isActive }) => ({
+              padding: '6px 14px', borderRadius: 8, textDecoration: 'none',
+              fontSize: 14, fontWeight: 500, transition: 'all 0.2s',
+              color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+              background: isActive ? 'var(--accent-dim)' : 'transparent',
+            })}>
+            Analytics
+          </NavLink>
+        )}
       </div>
 
       {/* User info */}
