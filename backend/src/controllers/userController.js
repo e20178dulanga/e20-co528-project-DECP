@@ -67,6 +67,22 @@ const getUserStats = async (req, res) => {
   }
 };
 
+// ── GET /api/users/search ──────────────────────────────────────
+const searchUsers = async (req, res) => {
+  try {
+    const q = req.query.q || '';
+    if (!q.trim()) return res.status(200).json({ users: [] });
+    
+    // Explicitly select only public-safe fields
+    const users = await User.find({ name: { $regex: q, $options: 'i' } })
+      .select('name profilePicture role')
+      .limit(15);
+    return res.status(200).json({ users });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 // ── GET /api/users  (admin only) ──────────────────────────────
 const getAllUsers = async (req, res) => {
   try {
@@ -77,4 +93,4 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { getMe, updateMe, getUserById, getAllUsers, getUserStats };
+module.exports = { getMe, updateMe, getUserById, getAllUsers, getUserStats, searchUsers };
