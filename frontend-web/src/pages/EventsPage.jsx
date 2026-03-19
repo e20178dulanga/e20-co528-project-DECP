@@ -142,7 +142,7 @@ export default function EventsPage() {
                   {notifications.length === 0 ? (
                     <p style={{ padding: 16, color: 'var(--text-secondary)', fontSize: 13 }}>No notifications</p>
                   ) : notifications.map(n => (
-                    <div key={n._id} style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', background: n.isRead ? 'transparent' : 'rgba(124,77,255,0.06)', fontSize: 13 }}>
+                    <div key={n._id} style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', background: n.isRead ? 'transparent' : 'var(--accent-dim)', fontSize: 13 }}>
                       <p style={{ color: n.isRead ? 'var(--text-secondary)' : 'var(--text-primary)' }}>{n.message}</p>
                       <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{fmtDate(n.createdAt)}</p>
                     </div>
