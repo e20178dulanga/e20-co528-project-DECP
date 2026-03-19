@@ -349,7 +349,7 @@ All routes require `Authorization: Bearer <token>` (token from Auth Service logi
 
 ### Media Files
 
-Uploaded files are served at: `GET http://localhost:5001/uploads/<filename>`  
+Uploaded files are now converted to **Base64 Data URLs** and stored directly in MongoDB to ensure persistence across cloud re-deployments (Render's ephemeral filesystem).  
 Allowed types: JPEG, PNG, GIF, WEBP, MP4, MOV. Max size: 10MB. Max 5 files per post.
 
 ---

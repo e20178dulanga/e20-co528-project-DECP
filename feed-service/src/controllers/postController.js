@@ -2,17 +2,8 @@ const path = require('path');
 const multer = require('multer');
 const Post = require('../models/Post');
 
-// ── Multer config: local disk storage ────────────────────────
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, path.join(__dirname, '..', '..', 'uploads'));
-  },
-  filename: (_req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `${unique}${ext}`);
-  },
-});
+// ── Multer config: memory storage (for MongoDB Base64 conversion) ──
+const storage = multer.memoryStorage();
 
 const fileFilter = (_req, file, cb) => {
   const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime'];
@@ -65,11 +56,14 @@ const createMediaPost = [
         return res.status(400).json({ message: 'Post must have content or at least one media file.' });
       }
 
-      const mediaFiles = (req.files || []).map((file) => ({
-        url: `/uploads/${file.filename}`,
-        type: getMediaType(file.mimetype),
-        filename: file.filename,
-      }));
+      const mediaFiles = (req.files || []).map((file) => {
+        const base64Data = file.buffer.toString('base64');
+        return {
+          url: `data:${file.mimetype};base64,${base64Data}`,
+          type: getMediaType(file.mimetype),
+          filename: file.originalname,
+        };
+      });
 
       const post = await Post.create({
         author: req.user.id,

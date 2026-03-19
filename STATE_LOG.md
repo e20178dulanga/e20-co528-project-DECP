@@ -16,6 +16,14 @@
 
 ---
 
+## Phase 8 — Persistent Media Storage (Completed 2026-03-19)
+
+- **Objective:** Prevent data loss of uploaded media files due to cloud file systems resetting (e.g., Render restarts).
+- **Implementation:** Refactored `feed-service` `postController.js` to use `multer.memoryStorage()`. Uploaded images and videos are now converted to Base64 data URLs and saved directly in the MongoDB `Post` documents. This avoids local disk storage entirely.
+- **Current Status:** ✅ Completed. Media files will now persist permanently in the database.
+
+---
+
 ## Phase 7 — Frontend Caching & UX Optimization (Completed 2026-03-18)
 
 - **Objective:** Improve frontend UX by preventing unnecessary API refetching and loading spinners when navigating between tabs.
