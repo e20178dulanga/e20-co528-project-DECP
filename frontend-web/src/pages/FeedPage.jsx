@@ -52,7 +52,8 @@ function PostCard({ post, currentUserId, onLike, onShare, onDelete }) {
           {post.mediaFiles.map((m, i) => {
             // Derive base URL from FEED_URL (remove the /api suffix)
             const mediaBase = FEED_URL.replace(/\/api$/, '');
-            const src = m.url?.startsWith('http') ? m.url : `${mediaBase}${m.url}`;
+            const isAbsolute = m.url?.startsWith('http') || m.url?.startsWith('data:');
+            const src = isAbsolute ? m.url : `${mediaBase}${m.url}`;
             return m.type === 'image'
               ? <img key={i} src={src} alt="post media" />
               : <video key={i} controls src={src} />;
