@@ -157,7 +157,7 @@ export default function FeedPage() {
   return (
     <div className="page-wrapper">
       <div className="page-header">
-        <h2>🏠 Community Feed</h2>
+        <h2>Community Feed</h2>
         <p>Share updates, achievements, and connect with your department.</p>
       </div>
 
@@ -174,12 +174,12 @@ export default function FeedPage() {
               />
               <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'center' }}>
                 <label style={{ cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  📎 {mediaFiles.length > 0 ? `${mediaFiles.length} file(s)` : 'Attach media'}
+                  {mediaFiles.length > 0 ? `${mediaFiles.length} file(s)` : 'Attach media'}
                   <input ref={fileRef} type="file" accept="image/*,video/*" multiple style={{ display: 'none' }}
                     onChange={e => setMediaFiles(Array.from(e.target.files))} />
                 </label>
                 <button type="submit" className="btn btn-primary btn-sm" disabled={submitting} style={{ marginLeft: 'auto' }}>
-                  {submitting ? 'Posting…' : '✨ Post'}
+                  {submitting ? 'Posting…' : 'Post'}
                 </button>
               </div>
               {isError && <div className="alert alert-error" style={{ marginTop: 8 }}>{error || 'Error loading posts.'}</div>}
