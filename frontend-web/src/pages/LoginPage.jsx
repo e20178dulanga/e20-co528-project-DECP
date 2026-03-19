@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api/authApi';
 import { useAuth } from '../context/AuthContext';
+import logoUrl from '../assets/logo.png';
 
 export default function LoginPage() {
   const { loginSuccess } = useAuth();
@@ -26,7 +27,7 @@ export default function LoginPage() {
     <div className="auth-wrapper">
       <div className="auth-card">
         <div className="auth-logo">
-          <div style={{ fontSize: 40, marginBottom: 8 }}>🎓</div>
+          <img src={logoUrl} alt="DECP Logo" style={{ width: 64, height: 64, marginBottom: 8, objectFit: 'contain' }} />
           <h1>DECP</h1>
           <p>Department Engagement & Career Platform</p>
         </div>
