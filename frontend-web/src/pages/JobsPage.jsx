@@ -39,7 +39,7 @@ function ApplyModal({ job, onClose, onSuccess }) {
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Submitting…' : '🚀 Submit Application'}
+              {loading ? 'Submitting…' : 'Submit Application'}
             </button>
           </div>
         </form>
@@ -71,7 +71,7 @@ function PostJobModal({ onClose, onSuccess }) {
         </div>
         {error && <div className="alert alert-error">{error}</div>}
         <form onSubmit={handleSubmit}>
-          {[['title','Job Title','Software Engineer'],['company','Company','TechCorp LK'],['location','Location','Colombo']].map(([k,l,p]) => (
+          {[['title', 'Job Title', 'Software Engineer'], ['company', 'Company', 'TechCorp LK'], ['location', 'Location', 'Colombo']].map(([k, l, p]) => (
             <div key={k} className="form-group">
               <label>{l}</label>
               <input value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} placeholder={p} required />
@@ -95,7 +95,7 @@ function PostJobModal({ onClose, onSuccess }) {
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Posting…' : '💼 Post Job'}
+              {loading ? 'Posting…' : 'Post Job'}
             </button>
           </div>
         </form>
@@ -138,7 +138,7 @@ export default function JobsPage() {
 
       <div className="flex-between page-header">
         <div>
-          <h2>💼 Jobs & Internships</h2>
+          <h2>Jobs & Internships</h2>
           <p>Opportunities posted by alumni and department staff.</p>
         </div>
         {canPost && (
@@ -151,10 +151,10 @@ export default function JobsPage() {
 
       {/* Filters */}
       <div className="flex-gap" style={{ marginBottom: 20 }}>
-        {['all','job','internship'].map(f => (
+        {['all', 'job', 'internship'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-secondary'}`}>
-            {f === 'all' ? '📋 All' : f === 'job' ? '🏢 Jobs' : '🎓 Internships'}
+            {f === 'all' ? 'All' : f === 'job' ? 'Jobs' : 'Internships'}
           </button>
         ))}
       </div>

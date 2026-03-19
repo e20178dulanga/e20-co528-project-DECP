@@ -26,22 +26,22 @@ function CreateEventModal({ onClose, onSuccess }) {
         {error && <div className="alert alert-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group"><label>Title</label>
-            <input value={form.title} onChange={e => setForm(f=>({...f,title:e.target.value}))} required placeholder="CS Career Workshop" /></div>
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required placeholder="CS Career Workshop" /></div>
           <div className="form-group"><label>Type</label>
-            <select value={form.type} onChange={e => setForm(f=>({...f,type:e.target.value}))}>
+            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
               <option value="event">Event</option>
               <option value="workshop">Workshop</option>
               <option value="announcement">Announcement</option>
             </select></div>
           <div className="form-group"><label>Description</label>
-            <textarea value={form.description} onChange={e => setForm(f=>({...f,description:e.target.value}))} required /></div>
+            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} required /></div>
           <div className="form-group"><label>Location</label>
-            <input value={form.location} onChange={e => setForm(f=>({...f,location:e.target.value}))} placeholder="Hall A or Online" /></div>
+            <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} placeholder="Hall A or Online" /></div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group"><label>Start Date</label>
-              <input type="datetime-local" value={form.startDate} onChange={e => setForm(f=>({...f,startDate:e.target.value}))} required /></div>
+              <input type="datetime-local" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} required /></div>
             <div className="form-group"><label>Capacity (0=unlimited)</label>
-              <input type="number" min={0} value={form.capacity} onChange={e => setForm(f=>({...f,capacity:parseInt(e.target.value)||0}))} /></div>
+              <input type="number" min={0} value={form.capacity} onChange={e => setForm(f => ({ ...f, capacity: parseInt(e.target.value) || 0 }))} /></div>
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
@@ -53,8 +53,8 @@ function CreateEventModal({ onClose, onSuccess }) {
   );
 }
 
-const TYPE_BADGE = { event:'badge-purple', workshop:'badge-cyan', announcement:'badge-yellow' };
-const TYPE_EMOJI = { event:'🎉', workshop:'🛠️', announcement:'📢' };
+const TYPE_BADGE = { event: 'badge-purple', workshop: 'badge-cyan', announcement: 'badge-yellow' };
+const TYPE_EMOJI = { event: '🎉', workshop: '🛠️', announcement: '📢' };
 
 export default function EventsPage() {
   const { user } = useAuth();
@@ -123,7 +123,7 @@ export default function EventsPage() {
 
       <div className="flex-between page-header">
         <div>
-          <h2>📅 Events & Announcements</h2>
+          <h2>Events & Announcements</h2>
           <p>Upcoming workshops, events, and department announcements.</p>
         </div>
         <div className="flex-gap">
@@ -160,7 +160,7 @@ export default function EventsPage() {
 
       {/* Filters */}
       <div className="flex-gap" style={{ marginBottom: 20 }}>
-        {['all','event','workshop','announcement'].map(f => (
+        {['all', 'event', 'workshop', 'announcement'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-secondary'}`}>
             {f === 'all' ? '📋 All' : f === 'event' ? '🎉 Events' : f === 'workshop' ? '🛠️ Workshops' : '📢 Announcements'}
@@ -202,8 +202,8 @@ export default function EventsPage() {
                     isRsvped
                       ? <button onClick={() => handleRsvp(ev._id, true)} className="btn btn-danger btn-sm">✗ Cancel RSVP</button>
                       : <button onClick={() => handleRsvp(ev._id, false)} className="btn btn-success btn-sm" disabled={isFull}>
-                          {isFull ? 'Full' : '✓ RSVP'}
-                        </button>
+                        {isFull ? 'Full' : '✓ RSVP'}
+                      </button>
                   )}
                 </div>
               </div>
