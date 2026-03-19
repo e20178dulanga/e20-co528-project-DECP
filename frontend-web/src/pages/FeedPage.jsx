@@ -85,7 +85,7 @@ function PostCard({ post, currentUserId, onLike, onShare, onDelete }) {
             </div>
           ))}
           <form onSubmit={submitComment} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-            <input className="form-group" style={{ flex: 1, padding: '7px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: 13 }}
+            <input className="form-group" style={{ flex: 1, padding: '7px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: 13 }}
               placeholder="Write a comment…" value={newComment} onChange={e => setNewComment(e.target.value)} />
             <button type="submit" className="btn btn-primary btn-sm" disabled={loadingComment}>Post</button>
           </form>
@@ -170,7 +170,7 @@ export default function FeedPage() {
               <textarea
                 placeholder={`What's on your mind, ${user.name.split(' ')[0]}?`}
                 value={content} onChange={e => setContent(e.target.value)}
-                style={{ width: '100%', minHeight: 80, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: 14, padding: '10px 14px', resize: 'vertical', outline: 'none' }}
+                style={{ width: '100%', minHeight: 80, background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: 14, padding: '10px 14px', resize: 'vertical', outline: 'none' }}
               />
               <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'center' }}>
                 <label style={{ cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
