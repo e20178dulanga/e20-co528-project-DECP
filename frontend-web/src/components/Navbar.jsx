@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { initials } from '../api/config';
+import logoUrl from '../assets/logo.png';
 
 const NAV_LINKS = [
-  { to: '/feed',   label: '🏠 Feed' },
-  { to: '/jobs',   label: '💼 Jobs' },
-  { to: '/events', label: '📅 Events' },
+  { to: '/feed', label: 'Feed' },
+  { to: '/jobs', label: 'Jobs' },
+  { to: '/events', label: 'Events' },
 ];
 
 export default function Navbar() {
@@ -27,7 +28,7 @@ export default function Navbar() {
     }}>
       {/* Logo */}
       <NavLink to="/feed" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', marginRight: '16px' }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎓</div>
+        <img src={logoUrl} alt="DECP Logo" style={{ width: 32, height: 32, objectFit: 'contain' }} />
         <span style={{ fontWeight: 800, fontSize: 16, background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>DECP</span>
       </NavLink>
 
