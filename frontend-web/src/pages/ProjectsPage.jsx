@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProjects, createProject, addCollaborator, uploadDocuments } from '../api/projectsApi';
+import { getProjects, createProject, addCollaborator, uploadDocuments, updateProject, deleteProject } from '../api/projectsApi';
 import { searchUsers } from '../api/usersApi';
 import { useAuth } from '../context/AuthContext';
 
@@ -44,6 +44,7 @@ export default function ProjectsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [editingProject, setEditingProject] = useState(null);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['projects'],
@@ -70,9 +71,33 @@ export default function ProjectsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] })
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, title, description }) => updateProject(id, { title, description }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setEditingProject(null);
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteProject,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] })
+  });
+
   const handleCreate = (e) => {
     e.preventDefault();
     createMutation.mutate({ title, description });
+  };
+
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    updateMutation.mutate({ id: editingProject._id, title: editingProject.title, description: editingProject.description });
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      deleteMutation.mutate(id);
+    }
   };
 
   const handleFileUpload = (e, projectId) => {
@@ -116,16 +141,39 @@ export default function ProjectsPage() {
             No projects found. Create one to start collaborating!
           </div>
         )}
-        {projects.map(p => (
+        {projects.map(p => {
+          const isOwner = p.owner === user?._id || p.owner === user?.id || p.ownerName === user?.name;
+          return (
           <div key={p._id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 8px 0' }}>{p.title}</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>{p.description}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <h3 style={{ margin: '0 0 8px 0' }}>{p.title}</h3>
+              {isOwner && (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: 12 }} onClick={() => setEditingProject(p)}>Edit</button>
+                  <button className="btn btn-primary" style={{ padding: '4px 8px', fontSize: 12, backgroundColor: '#ef4444', borderColor: '#ef4444' }} onClick={() => handleDelete(p._id)} disabled={deleteMutation.isPending}>Delete</button>
+                </div>
+              )}
+            </div>
+            
+            {editingProject?._id === p._id ? (
+              <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                <input type="text" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 14 }} value={editingProject.title} onChange={e => setEditingProject({...editingProject, title: e.target.value})} required />
+                <textarea style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 14, resize: 'vertical' }} value={editingProject.description} onChange={e => setEditingProject({...editingProject, description: e.target.value})} required rows={3}></textarea>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="submit" className="btn btn-primary" style={{ padding: '6px 12px', fontSize: 13 }} disabled={updateMutation.isPending}>Save</button>
+                  <button type="button" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 13 }} onClick={() => setEditingProject(null)}>Cancel</button>
+                </div>
+              </form>
+            ) : (
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>{p.description}</p>
+            )}
+
             <div style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-primary)' }}>
               <strong>Owner:</strong> {p.ownerName}
             </div>
             <div style={{ fontSize: 13, marginBottom: 16, color: 'var(--text-primary)' }}>
               <strong>Collaborators:</strong> {p.collaborators.length > 0 ? p.collaborators.map(c => c.name).join(', ') : 'None'}
-              {(p.owner === user?._id || p.owner === user?.id || p.ownerName === user?.name) && (
+              {isOwner && (
                 <AddCollaboratorForm projectId={p._id} onAdd={(data) => collabMutation.mutate(data)} />
               )}
             </div>
@@ -152,7 +200,8 @@ export default function ProjectsPage() {
               </label>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
