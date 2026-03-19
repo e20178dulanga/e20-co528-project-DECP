@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const {
   createPost, createMediaPost, getPosts, getPostById,
-  updatePost, deletePost, toggleLike, sharePost,
+  updatePost, deletePost, toggleLike, sharePost, getPostStats
 } = require('../controllers/postController');
 
 const router = express.Router();
@@ -12,6 +12,7 @@ router.use(authMiddleware);
 
 // Feed
 router.get('/', getPosts);
+router.get('/stats', getPostStats);
 router.get('/:id', getPostById);
 
 // Create

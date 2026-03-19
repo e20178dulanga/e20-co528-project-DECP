@@ -430,6 +430,27 @@ All routes require `Authorization: Bearer <token>`.
 - [x] **Phase 5** – Web Client (React + Vite, port 5173)
 - [x] **Phase 6** – Cloud Deployment Preparation (Render + Vercel)
 - [x] **Phase 7** – Frontend Caching & UX Optimization (React Query)
+- [x] **Phase 8** – Analytics Dashboard, Real-Time Messaging, and Research Collaboration
+
+---
+
+## API Reference — Phase 8: Feature Expansion
+
+### Analytics Endpoints
+- `GET /api/users/stats` (Auth Service) - Total users, students, alumni.
+- `GET /api/posts/stats` (Feed Service) - Total posts, top posts by likes.
+- `GET /api/jobs/stats` (Jobs Service) - Total jobs, open jobs, top jobs by applications.
+
+### Messaging (Auth Service)
+- `GET /api/messages/conversations` - List recent chat partners.
+- `GET /api/messages/:userId` - Get direct messages with a specific user.
+- `POST /api/messages` - Send a text message to a user.
+
+### Research Collaboration (Feed Service)
+- `GET /api/projects` - List user's active projects.
+- `POST /api/projects` - Create a project workspace.
+- `POST /api/projects/:id/collaborators` - Add team members to a project.
+- `POST /api/projects/:id/documents` - Upload shared research files (multipart data).
 
 ---
 

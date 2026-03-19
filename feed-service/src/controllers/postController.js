@@ -202,4 +202,22 @@ const sharePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, createMediaPost, getPosts, getPostById, updatePost, deletePost, toggleLike, sharePost };
+// ── GET /api/posts/stats ─────────────────────────────────
+const getPostStats = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin' && req.user.role !== 'alumni') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    const totalPosts = await Post.countDocuments();
+    const topPosts = await Post.aggregate([
+      { $addFields: { likeCount: { $size: { $ifNull: ["$likes", []] } } } },
+      { $sort: { likeCount: -1 } },
+      { $limit: 5 }
+    ]);
+    return res.status(200).json({ totalPosts, topPosts });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createPost, createMediaPost, getPosts, getPostById, updatePost, deletePost, toggleLike, sharePost, getPostStats };
