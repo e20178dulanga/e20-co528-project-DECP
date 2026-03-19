@@ -102,10 +102,10 @@ export default function ProjectsPage() {
       {showCreate && (
         <div className="card" style={{ marginBottom: 24 }}>
           <h3 style={{ marginBottom: 16 }}>Create New Project</h3>
-          <form onSubmit={handleCreate}>
-            <input type="text" className="form-group" style={{ marginBottom: 12 }} placeholder="Project Title" value={title} onChange={e => setTitle(e.target.value)} required />
-            <textarea className="form-group" style={{ marginBottom: 12 }} placeholder="Project Description" value={description} onChange={e => setDescription(e.target.value)} required rows={3}></textarea>
-            <button type="submit" className="btn btn-primary" disabled={createMutation.isPending}>Create Project</button>
+          <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <input type="text" style={{ padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)', width: '100%', fontSize: 14 }} placeholder="Project Title" value={title} onChange={e => setTitle(e.target.value)} required />
+            <textarea style={{ padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)', width: '100%', fontSize: 14, resize: 'vertical' }} placeholder="Project Description" value={description} onChange={e => setDescription(e.target.value)} required rows={3}></textarea>
+            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }} disabled={createMutation.isPending}>Create Project</button>
           </form>
         </div>
       )}
@@ -125,7 +125,7 @@ export default function ProjectsPage() {
             </div>
             <div style={{ fontSize: 13, marginBottom: 16, color: 'var(--text-primary)' }}>
               <strong>Collaborators:</strong> {p.collaborators.length > 0 ? p.collaborators.map(c => c.name).join(', ') : 'None'}
-              {p.owner === user._id && (
+              {(p.owner === user?._id || p.owner === user?.id || p.ownerName === user?.name) && (
                 <AddCollaboratorForm projectId={p._id} onAdd={(data) => collabMutation.mutate(data)} />
               )}
             </div>

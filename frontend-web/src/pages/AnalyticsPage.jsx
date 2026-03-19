@@ -5,14 +5,13 @@ import { useAuth } from '../context/AuthContext';
 export default function AnalyticsPage() {
   const { user } = useAuth();
 
-  const { data: stats, isLoading, isError } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ['analyticsStats'],
     queryFn: async () => {
-      const [uRes, pRes, jRes] = await Promise.all([
-        getUserStats(),
-        getPostStats(),
-        getJobStats()
-      ]);
+      const uRes = await getUserStats().catch(e => ({ data: { totalUsers: 0, students: 0, alumni: 0, error: true } }));
+      const pRes = await getPostStats().catch(e => ({ data: { totalPosts: 0, topPosts: [], error: true } }));
+      const jRes = await getJobStats().catch(e => ({ data: { totalJobs: 0, openJobs: 0, popularJobs: [], error: true } }));
+      
       return {
         users: uRes.data,
         posts: pRes.data,
@@ -26,7 +25,6 @@ export default function AnalyticsPage() {
   }
 
   if (isLoading) return <div className="spinner-wrap"><div className="spinner" /><span>Loading analytics…</span></div>;
-  if (isError) return <div className="page-wrapper"><div className="alert alert-error">Failed to load analytics mapping. Please wait until servers start.</div></div>;
 
   return (
     <div className="page-wrapper wide">
@@ -38,18 +36,30 @@ export default function AnalyticsPage() {
       <div className="grid-3" style={{ marginBottom: 24 }}>
         <div className="card">
           <h3 style={{ color: 'var(--text-secondary)' }}>Users</h3>
-          <p style={{ fontSize: 32, fontWeight: 800 }}>{stats.users.totalUsers}</p>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{stats.users.students} Students • {stats.users.alumni} Alumni</p>
+          {stats.users.error ? <p style={{ color: 'red', fontSize: 13, marginTop: 8 }}>Auth Service Offline/Access Denied.</p> : (
+            <>
+              <p style={{ fontSize: 32, fontWeight: 800 }}>{stats.users.totalUsers}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{stats.users.students} Students • {stats.users.alumni} Alumni</p>
+            </>
+          )}
         </div>
         <div className="card">
           <h3 style={{ color: 'var(--text-secondary)' }}>Content</h3>
-          <p style={{ fontSize: 32, fontWeight: 800 }}>{stats.posts.totalPosts}</p>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Total Posts Created</p>
+          {stats.posts.error ? <p style={{ color: 'red', fontSize: 13, marginTop: 8 }}>Feed Service Offline.</p> : (
+            <>
+              <p style={{ fontSize: 32, fontWeight: 800 }}>{stats.posts.totalPosts}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Total Posts Created</p>
+            </>
+          )}
         </div>
         <div className="card">
           <h3 style={{ color: 'var(--text-secondary)' }}>Jobs</h3>
-          <p style={{ fontSize: 32, fontWeight: 800 }}>{stats.jobs.totalJobs}</p>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{stats.jobs.openJobs} Open Opportunities</p>
+          {stats.jobs.error ? <p style={{ color: 'red', fontSize: 13, marginTop: 8 }}>Jobs Service Offline.</p> : (
+            <>
+              <p style={{ fontSize: 32, fontWeight: 800 }}>{stats.jobs.totalJobs}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{stats.jobs.openJobs} Open Opportunities</p>
+            </>
+          )}
         </div>
       </div>
 
