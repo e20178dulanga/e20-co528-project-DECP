@@ -21,7 +21,7 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(16px)',
+      background: 'rgba(224, 242, 254, 0.9)', backdropFilter: 'blur(16px)',
       borderBottom: '1px solid var(--border)', height: 'var(--nav-height)',
       display: 'flex', alignItems: 'center', padding: '0 24px', gap: '16px',
     }}>
@@ -32,7 +32,7 @@ export default function Navbar() {
       </NavLink>
 
       {/* Nav links — desktop */}
-      <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+      <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center', marginRight: '48px' }}>
         {NAV_LINKS.map(({ to, label }) => (
           <NavLink key={to} to={to}
             style={({ isActive }) => ({
