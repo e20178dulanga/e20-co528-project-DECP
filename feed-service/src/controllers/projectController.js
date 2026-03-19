@@ -82,4 +82,34 @@ const uploadDocuments = [
   }
 ];
 
-module.exports = { createProject, getProjects, addCollaborator, uploadDocuments };
+const updateProject = async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+    if (project.owner.toString() !== req.user.id) return res.status(403).json({ message: 'Only owner can edit' });
+
+    project.title = title || project.title;
+    project.description = description || project.description;
+    await project.save();
+
+    res.status(200).json({ project });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const deleteProject = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+    if (project.owner.toString() !== req.user.id) return res.status(403).json({ message: 'Only owner can delete' });
+
+    await project.deleteOne();
+    res.status(200).json({ message: 'Project deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { createProject, getProjects, addCollaborator, uploadDocuments, updateProject, deleteProject };
