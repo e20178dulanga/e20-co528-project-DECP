@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
-import { getJobs, createJob, applyForJob, getMyApplications } from '../api/jobsApi';
+import { getJobs, createJob, applyForJob, getMyApplications, getApplications } from '../api/jobsApi';
 import { fmtDate } from '../api/config';
 
 function ApplyModal({ job, onClose, onSuccess }) {
@@ -113,10 +113,58 @@ function PostJobModal({ onClose, onSuccess }) {
   );
 }
 
+function ViewApplicationsModal({ job, onClose }) {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    getApplications(job._id)
+      .then(res => setApplications(res.data.applications))
+      .catch(err => setError(err.response?.data?.message || 'Failed to load applications'))
+      .finally(() => setLoading(false));
+  }, [job._id]);
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 600, maxHeight: '80vh', overflowY: 'auto' }}>
+        <div className="modal-header">
+          <h3>Applications for: {job.title}</h3>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        {loading && <p>Loading applications...</p>}
+        {error && <div className="alert alert-error">{error}</div>}
+        {!loading && !error && applications.length === 0 && <p>No applications yet.</p>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 15, marginTop: 15 }}>
+          {applications.map(app => (
+            <div key={app._id} style={{ padding: 15, border: '1px solid var(--border-color)', borderRadius: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                <strong>{app.applicantName}</strong>
+                <span className="badge badge-gray">{app.applicantRole}</span>
+              </div>
+              {app.coverLetter && (
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: 10 }}>
+                  {app.coverLetter}
+                </p>
+              )}
+              {app.cvFile?.url && (
+                <a href={app.cvFile.url} download={app.cvFile.filename} className="btn btn-sm btn-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                  📄 Download CV
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function JobsPage() {
   const { user } = useAuth();
   const [filter, setFilter] = useState('all');
   const [applyJob, setApplyJob] = useState(null);
+  const [viewAppsJob, setViewAppsJob] = useState(null);
   const [showPostModal, setShowPostModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -143,6 +191,7 @@ export default function JobsPage() {
   return (
     <div className="page-wrapper wide">
       {applyJob && <ApplyModal job={applyJob} onClose={() => setApplyJob(null)} onSuccess={handleApplySuccess} />}
+      {viewAppsJob && <ViewApplicationsModal job={viewAppsJob} onClose={() => setViewAppsJob(null)} />}
       {showPostModal && <PostJobModal onClose={() => setShowPostModal(false)} onSuccess={refetch} />}
 
       <div className="flex-between page-header">
@@ -204,7 +253,11 @@ export default function JobsPage() {
                   <span style={{ fontSize: 12, color: 'var(--text-muted)', flexGrow: 1 }}>
                     {job.applicationCount} applied · by {job.posterName}
                   </span>
-                  {!isOwn && job.isOpen && (
+                  {isOwn ? (
+                    <button className="btn btn-secondary btn-sm" onClick={() => setViewAppsJob(job)}>
+                      View Applications
+                    </button>
+                  ) : job.isOpen && (
                     applied
                       ? <span className="badge badge-green">✓ Applied</span>
                       : <button className="btn btn-primary btn-sm" onClick={() => setApplyJob(job)}>Apply Now</button>
