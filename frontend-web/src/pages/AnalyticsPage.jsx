@@ -11,7 +11,7 @@ export default function AnalyticsPage() {
       const uRes = await getUserStats().catch(e => ({ data: { totalUsers: 0, students: 0, alumni: 0, error: true } }));
       const pRes = await getPostStats().catch(e => ({ data: { totalPosts: 0, topPosts: [], error: true } }));
       const jRes = await getJobStats().catch(e => ({ data: { totalJobs: 0, openJobs: 0, popularJobs: [], error: true } }));
-      
+
       return {
         users: uRes.data,
         posts: pRes.data,
@@ -29,7 +29,7 @@ export default function AnalyticsPage() {
   return (
     <div className="page-wrapper wide">
       <div className="page-header">
-        <h2>📈 Analytics Dashboard</h2>
+        <h2>Analytics Dashboard</h2>
         <p>Platform overview and engagement metrics.</p>
       </div>
 

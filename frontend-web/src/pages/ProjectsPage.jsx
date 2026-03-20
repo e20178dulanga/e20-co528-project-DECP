@@ -7,15 +7,15 @@ import { useAuth } from '../context/AuthContext';
 function AddCollaboratorForm({ projectId, onAdd }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  
+
   const handleSearch = async (e) => {
     e.preventDefault();
-    if(!query.trim()) return;
+    if (!query.trim()) return;
     try {
       const res = await searchUsers(query);
       // Filter out existing potential collaborators visually if needed, but backend handles deduping anyway
       setResults(res.data.users);
-    } catch(err) { }
+    } catch (err) { }
   };
 
   return (
@@ -105,7 +105,7 @@ export default function ProjectsPage() {
     if (!files.length) return;
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
+      formData.append('files', files[i]);
     }
     uploadMutation.mutate({ id: projectId, formData });
   };
@@ -116,7 +116,7 @@ export default function ProjectsPage() {
     <div className="page-wrapper wide">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2>🔬 Research Collaboration</h2>
+          <h2>Research Collaboration</h2>
           <p>Manage projects, share documents, and work together.</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowCreate(!showCreate)}>
@@ -144,62 +144,62 @@ export default function ProjectsPage() {
         {projects.map(p => {
           const isOwner = p.owner === user?._id || p.owner === user?.id || p.ownerName === user?.name;
           return (
-          <div key={p._id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <h3 style={{ margin: '0 0 8px 0' }}>{p.title}</h3>
-              {isOwner && (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: 12 }} onClick={() => setEditingProject(p)}>Edit</button>
-                  <button className="btn btn-primary" style={{ padding: '4px 8px', fontSize: 12, backgroundColor: '#ef4444', borderColor: '#ef4444' }} onClick={() => handleDelete(p._id)} disabled={deleteMutation.isPending}>Delete</button>
-                </div>
-              )}
-            </div>
-            
-            {editingProject?._id === p._id ? (
-              <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-                <input type="text" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 14 }} value={editingProject.title} onChange={e => setEditingProject({...editingProject, title: e.target.value})} required />
-                <textarea style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 14, resize: 'vertical' }} value={editingProject.description} onChange={e => setEditingProject({...editingProject, description: e.target.value})} required rows={3}></textarea>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="submit" className="btn btn-primary" style={{ padding: '6px 12px', fontSize: 13 }} disabled={updateMutation.isPending}>Save</button>
-                  <button type="button" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 13 }} onClick={() => setEditingProject(null)}>Cancel</button>
-                </div>
-              </form>
-            ) : (
-              <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>{p.description}</p>
-            )}
+            <div key={p._id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <h3 style={{ margin: '0 0 8px 0' }}>{p.title}</h3>
+                {isOwner && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: 12 }} onClick={() => setEditingProject(p)}>Edit</button>
+                    <button className="btn btn-primary" style={{ padding: '4px 8px', fontSize: 12, backgroundColor: '#ef4444', borderColor: '#ef4444' }} onClick={() => handleDelete(p._id)} disabled={deleteMutation.isPending}>Delete</button>
+                  </div>
+                )}
+              </div>
 
-            <div style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-primary)' }}>
-              <strong>Owner:</strong> {p.ownerName}
-            </div>
-            <div style={{ fontSize: 13, marginBottom: 16, color: 'var(--text-primary)' }}>
-              <strong>Collaborators:</strong> {p.collaborators.length > 0 ? p.collaborators.map(c => c.name).join(', ') : 'None'}
-              {isOwner && (
-                <AddCollaboratorForm projectId={p._id} onAdd={(data) => collabMutation.mutate(data)} />
+              {editingProject?._id === p._id ? (
+                <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                  <input type="text" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 14 }} value={editingProject.title} onChange={e => setEditingProject({ ...editingProject, title: e.target.value })} required />
+                  <textarea style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 14, resize: 'vertical' }} value={editingProject.description} onChange={e => setEditingProject({ ...editingProject, description: e.target.value })} required rows={3}></textarea>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit" className="btn btn-primary" style={{ padding: '6px 12px', fontSize: 13 }} disabled={updateMutation.isPending}>Save</button>
+                    <button type="button" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 13 }} onClick={() => setEditingProject(null)}>Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>{p.description}</p>
               )}
-            </div>
 
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 'auto' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: 14 }}>📄 Documents ({p.documents.length})</h4>
-              {p.documents.length > 0 && (
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {p.documents.map(d => (
-                    <li key={d._id} style={{ fontSize: 13 }}>
-                      <a href={d.url} download={d.filename} style={{ textDecoration: 'none', color: 'var(--accent)', fontWeight: 500 }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', marginRight: 6 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        {d.filename}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              
-              <label className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: 13, padding: '6px 14px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                {uploadMutation.isPending && uploadMutation.variables?.id === p._id ? 'Uploading...' : 'Upload Files'}
-                <input type="file" multiple onChange={(e) => handleFileUpload(e, p._id)} style={{ display: 'none' }} disabled={uploadMutation.isPending} />
-              </label>
+              <div style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-primary)' }}>
+                <strong>Owner:</strong> {p.ownerName}
+              </div>
+              <div style={{ fontSize: 13, marginBottom: 16, color: 'var(--text-primary)' }}>
+                <strong>Collaborators:</strong> {p.collaborators.length > 0 ? p.collaborators.map(c => c.name).join(', ') : 'None'}
+                {isOwner && (
+                  <AddCollaboratorForm projectId={p._id} onAdd={(data) => collabMutation.mutate(data)} />
+                )}
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 'auto' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: 14 }}>📄 Documents ({p.documents.length})</h4>
+                {p.documents.length > 0 && (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {p.documents.map(d => (
+                      <li key={d._id} style={{ fontSize: 13 }}>
+                        <a href={d.url} download={d.filename} style={{ textDecoration: 'none', color: 'var(--accent)', fontWeight: 500 }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', marginRight: 6 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                          {d.filename}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <label className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: 13, padding: '6px 14px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  {uploadMutation.isPending && uploadMutation.variables?.id === p._id ? 'Uploading...' : 'Upload Files'}
+                  <input type="file" multiple onChange={(e) => handleFileUpload(e, p._id)} style={{ display: 'none' }} disabled={uploadMutation.isPending} />
+                </label>
+              </div>
             </div>
-          </div>
           );
         })}
       </div>
