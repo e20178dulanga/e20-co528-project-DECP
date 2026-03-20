@@ -8,14 +8,14 @@ const app = express();
 
 // ── Middleware ─────────────────────────────────────────────────
 // ── CORS ───────────────────────────────────────────────────────
-// Allows: localhost dev + any *.vercel.app URL (covers Vercel
-// production, git-branch, and per-deploy preview URLs automatically)
+// Allows: any localhost port (dev) + any *.vercel.app URL
 const VERCEL_PATTERN = /\.vercel\.app$/;
+const LOCALHOST_PATTERN = /^http:\/\/localhost(:\d+)?$/;
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true);                    // server-to-server / Postman
-    if (origin === 'http://localhost:5173') return cb(null, true);
+    if (!origin) return cb(null, true);                    // server-to-server / Postman / native apps
+    if (LOCALHOST_PATTERN.test(origin)) return cb(null, true);
     if (VERCEL_PATTERN.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
