@@ -6,13 +6,18 @@ import { fmtDate } from '../api/config';
 
 function ApplyModal({ job, onClose, onSuccess }) {
   const [coverLetter, setCoverLetter] = useState('');
+  const [cvFile, setCvFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true); setError('');
     try {
-      await applyForJob(job._id, { coverLetter });
+      const formData = new FormData();
+      if (coverLetter) formData.append('coverLetter', coverLetter);
+      if (cvFile) formData.append('cv', cvFile);
+
+      await applyForJob(job._id, formData);
       onSuccess();
       onClose();
     } catch (err) { setError(err.response?.data?.message || 'Application failed.'); }
@@ -31,6 +36,10 @@ function ApplyModal({ job, onClose, onSuccess }) {
         </p>
         {error && <div className="alert alert-error">{error}</div>}
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>CV / Resume (optional)</label>
+            <input type="file" accept=".pdf,.doc,.docx" onChange={e => setCvFile(e.target.files[0])} />
+          </div>
           <div className="form-group">
             <label>Cover Letter (optional)</label>
             <textarea placeholder="Tell us why you're a great fit…" value={coverLetter}

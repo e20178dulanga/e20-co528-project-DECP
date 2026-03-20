@@ -23,6 +23,10 @@ const applicationSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, 'Cover letter cannot exceed 2000 characters'],
     },
+    cvFile: {
+      url: String,
+      filename: String,
+    },
     status: {
       type: String,
       enum: ['pending', 'reviewed', 'accepted', 'rejected'],

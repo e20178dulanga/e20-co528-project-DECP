@@ -22,6 +22,12 @@ const applyForJob = async (req, res) => {
       applicantName: req.user.name,
       applicantRole: req.user.role,
       coverLetter: req.body.coverLetter || '',
+      ...(req.file && {
+        cvFile: {
+          url: `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+          filename: req.file.originalname,
+        }
+      })
     });
 
     // Increment cached count on job
