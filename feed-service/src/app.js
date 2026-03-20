@@ -4,21 +4,19 @@ const path = require('path');
 
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
-const projectRoutes = require('./routes/projectRoutes');
 
 const app = express();
 
 // ── CORS ───────────────────────────────────────────────────────
-// Allows: localhost dev + any *.vercel.app URL (covers Vercel
-// production, git-branch, and per-deploy preview URLs automatically)
+// Allows: any localhost port (dev) + any *.vercel.app URL
 const VERCEL_PATTERN = /\.vercel\.app$/;
-console.log('ℹ️  Feed Service CORS: allowing localhost:5173 + *.vercel.app');
+const LOCALHOST_PATTERN = /^http:\/\/localhost(:\d+)?$/;
 
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true);                    // server-to-server / Postman
-    if (origin === 'http://localhost:5173') return cb(null, true);
+    if (!origin) return cb(null, true);                    // server-to-server / Postman / native apps
+    if (LOCALHOST_PATTERN.test(origin)) return cb(null, true);
     if (VERCEL_PATTERN.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
@@ -33,7 +31,6 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 // ── Routes ────────────────────────────────────────────────────
 app.use('/api/posts', postRoutes);
 app.use('/api/posts', commentRoutes);
-app.use('/api/projects', projectRoutes);
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>
