@@ -10,6 +10,7 @@ import EventsPage from './pages/EventsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import MessagesPage from './pages/MessagesPage';
 import ProjectsPage from './pages/ProjectsPage';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
   const { loading } = useAuth();
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
 
         {/* Catch-all */}

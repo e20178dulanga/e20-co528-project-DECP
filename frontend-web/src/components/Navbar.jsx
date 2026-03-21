@@ -58,6 +58,17 @@ export default function Navbar() {
             Analytics
           </NavLink>
         )}
+        {user.role === 'admin' && (
+          <NavLink to="/admin"
+            style={({ isActive }) => ({
+              padding: '6px 14px', borderRadius: 8, textDecoration: 'none',
+              fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
+              color: isActive ? '#fff' : '#e63946',
+              background: isActive ? '#e63946' : '#fff1f2',
+            })}>
+            🛡️ Admin
+          </NavLink>
+        )}
       </div>
 
       {/* User info */}
