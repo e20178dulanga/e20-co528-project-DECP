@@ -17,7 +17,10 @@ export default function RegisterScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      await register(name, email, password, role);
+      const message = await register(name, email, password, role);
+      Alert.alert('Registration Submitted', message, [
+        { text: 'OK', onPress: () => navigation.navigate('Login') }
+      ]);
     } catch (e) {
       Alert.alert('Registration Failed', e.response?.data?.message || 'Error creating account');
     } finally {

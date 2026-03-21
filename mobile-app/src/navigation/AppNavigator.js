@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,6 +16,7 @@ import EventsScreen from '../screens/Events/EventsScreen';
 import MessagesScreen from '../screens/Messages/MessagesScreen';
 import ProjectsScreen from '../screens/Projects/ProjectsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import AdminScreen from '../screens/Admin/AdminScreen';
 
 const AuthStack = createNativeStackNavigator();
 const FeedStack = createNativeStackNavigator();
@@ -37,43 +38,52 @@ const AuthNavigator = () => (
 
 const tabIcons = {
   Feed: { focused: 'home', unfocused: 'home-outline' },
-  Jobs: { focused: 'briefcase', unfocused: 'briefcase-outline' },
   Projects: { focused: 'folder', unfocused: 'folder-outline' },
   Messages: { focused: 'chatbubbles', unfocused: 'chatbubbles-outline' },
+  Jobs: { focused: 'briefcase', unfocused: 'briefcase-outline' },
   Events: { focused: 'calendar', unfocused: 'calendar-outline' },
   Profile: { focused: 'person', unfocused: 'person-outline' },
+  Admin: { focused: 'shield-checkmark', unfocused: 'shield-checkmark-outline' },
 };
 
-const MainTabsNavigator = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarIcon: ({ focused, color, size }) => {
-        const icons = tabIcons[route.name] || { focused: 'ellipse', unfocused: 'ellipse-outline' };
-        return <Ionicons name={focused ? icons.focused : icons.unfocused} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: '#003366',
-      tabBarInactiveTintColor: '#94a3b8',
-      tabBarStyle: {
-        backgroundColor: '#fff',
-        borderTopColor: '#f1f5f9',
-        paddingBottom: 4,
-        height: 56,
-      },
-      tabBarLabelStyle: {
-        fontSize: 11,
-        fontWeight: '600',
-      },
-    })}
-  >
-    <Tab.Screen name="Feed" component={FeedNavigator} />
-    <Tab.Screen name="Projects" component={ProjectsScreen} />
-    <Tab.Screen name="Messages" component={MessagesScreen} />
-    <Tab.Screen name="Jobs" component={JobsScreen} />
-    <Tab.Screen name="Events" component={EventsScreen} />
-    <Tab.Screen name="Profile" component={ProfileScreen} />
-  </Tab.Navigator>
-);
+const MainTabsNavigator = () => {
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === 'admin';
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = tabIcons[route.name] || { focused: 'ellipse', unfocused: 'ellipse-outline' };
+          return <Ionicons name={focused ? icons.focused : icons.unfocused} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#003366',
+        tabBarInactiveTintColor: '#94a3b8',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopColor: '#f1f5f9',
+          paddingBottom: 4,
+          height: 56,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+      })}
+    >
+      <Tab.Screen name="Feed" component={FeedNavigator} />
+      <Tab.Screen name="Projects" component={ProjectsScreen} />
+      <Tab.Screen name="Messages" component={MessagesScreen} />
+      <Tab.Screen name="Jobs" component={JobsScreen} />
+      <Tab.Screen name="Events" component={EventsScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+      {isAdmin && (
+        <Tab.Screen name="Admin" component={AdminScreen} />
+      )}
+    </Tab.Navigator>
+  );
+};
 
 export default function AppNavigator() {
   const { userToken, isLoading } = useContext(AuthContext);

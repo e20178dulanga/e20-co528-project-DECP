@@ -47,13 +47,18 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, role) => {
     try {
       const response = await apiAuth.post('/auth/register', { name, email, password, role });
-      const { token, user } = response.data;
-      
-      await storage.setItem('userToken', token);
-      await storage.setItem('userData', JSON.stringify(user));
-      
-      setUserToken(token);
-      setUser(user);
+      const { token, user: userData, message } = response.data;
+
+      // If backend returns a token (admin auto-approved), log in immediately
+      if (token) {
+        await storage.setItem('userToken', token);
+        await storage.setItem('userData', JSON.stringify(userData));
+        setUserToken(token);
+        setUser(userData);
+      }
+
+      // Return the message so the screen can display it
+      return message || 'Registration successful!';
     } catch (error) {
       console.error('Register error', error.response?.data || error);
       throw error;

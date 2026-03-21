@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema(
       enum: ['student', 'alumni', 'admin'],
       default: 'student',
     },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
+    },
     // ── Profile fields ─────────────────────────────────────────
     bio: { type: String, default: '' },
     graduationYear: { type: Number },
