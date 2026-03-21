@@ -1,10 +1,15 @@
 // API Base URLs — driven by Vite env vars for production, fallback to localhost for dev
 // Set these in Vercel dashboard as VITE_AUTH_URL, VITE_FEED_URL, etc.
-export const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'http://localhost:5000/api';
-export const FEED_URL = import.meta.env.VITE_FEED_URL || 'http://localhost:5001/api';
-export const JOBS_URL = import.meta.env.VITE_JOBS_URL || 'http://localhost:5002/api';
-export const EVENTS_URL = import.meta.env.VITE_EVENTS_URL || 'http://localhost:5003/api';
+// export const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'http://localhost:5000/api';
+// export const FEED_URL = import.meta.env.VITE_FEED_URL || 'http://localhost:5001/api';
+// export const JOBS_URL = import.meta.env.VITE_JOBS_URL || 'http://localhost:5002/api';
+// export const EVENTS_URL = import.meta.env.VITE_EVENTS_URL || 'http://localhost:5003/api';
 
+
+const AUTH_URL = 'https://e20-co528-project-decp-backend.onrender.com/api';
+const FEED_URL = 'https://e20-co528-project-decp-feed-service.onrender.com/api';
+const JOBS_URL = 'https://e20-co528-project-decp-jobs-service.onrender.com/api';
+const EVENTS_URL = 'https://e20-co528-project-decp-events-service.onrender.com/api';
 // Helper: get stored JWT token
 export const getToken = () => localStorage.getItem('decp_token');
 

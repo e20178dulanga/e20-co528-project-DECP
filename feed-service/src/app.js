@@ -9,8 +9,9 @@ const projectRoutes = require('./routes/projectRoutes');
 const app = express();
 
 // ── CORS ───────────────────────────────────────────────────────
-// Allows: any localhost port (dev) + any *.vercel.app URL
+// Allows: any localhost port (dev) + *.vercel.app + *.onrender.com
 const VERCEL_PATTERN = /\.vercel\.app$/;
+const RENDER_PATTERN = /\.onrender\.com$/;
 const LOCALHOST_PATTERN = /^http:\/\/localhost(:\d+)?$/;
 
 
@@ -19,6 +20,7 @@ app.use(cors({
     if (!origin) return cb(null, true);                    // server-to-server / Postman / native apps
     if (LOCALHOST_PATTERN.test(origin)) return cb(null, true);
     if (VERCEL_PATTERN.test(origin)) return cb(null, true);
+    if (RENDER_PATTERN.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
