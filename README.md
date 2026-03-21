@@ -196,6 +196,10 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
+## Ports
+Change the ports in the .env files if necessary
+Any changes made should be recorded in "e20-co528-project-DECP/frontend-web/src/api/config.js"
+
 ## Environment Variables
 
 ### Auth Service (`backend/.env`)
